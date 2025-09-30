@@ -30,6 +30,7 @@ const TripCard = ({ id, name, location, imageUrls, tags, price}: TripCardProps) 
                 </ChipListComponent>
             </div>
 
+
             <article className='tripCard-pill'>{price}</article>
         </Link>
     )
