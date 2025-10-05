@@ -1,13 +1,16 @@
 import React from 'react'
-import {Link, NavLink} from "react-router";
+import {Link, NavLink, useLoaderData, useNavigate} from "react-router";
 import {sidebarItems} from "~/constants";
 import {cn} from "~/libs/utils";
+import {logoutUser} from "~/appwrite/auth";
 
-const NavItems = ({ handleClick} : { handleClick: () => void }) => {
-    const users = {
-        name: 'Bright',
-        email: 'blakechima@gmail.com',
-        imageUrl: '/assets/images/david.webp'
+const NavItems = ({ handleClick } : { handleClick: () => void }) => {
+    const users = useLoaderData();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        await logoutUser();
+        navigate('/sign-in');
     }
 
 
@@ -39,7 +42,7 @@ const NavItems = ({ handleClick} : { handleClick: () => void }) => {
                 </nav>
 
                 <footer className='nav-footer'>
-                    <img src={users?.imageUrl || '/assets/images/david.webp'} alt={users?.name || 'Bright'}/>
+                    <img src={users?.imageUrl || '/assets/images/david.webp'} alt={users?.name || 'Bright'} referrerPolicy='no-referrer'/>
 
                     <article>
                         <h2>{users?.name}</h2>
@@ -47,9 +50,7 @@ const NavItems = ({ handleClick} : { handleClick: () => void }) => {
                     </article>
 
                     <button
-                        onClick={() => {
-                            console.log('logout')
-                        }}
+                        onClick={handleLogout}
                         className='cursor-pointer'
                     >
                         <img src='/assets/icons/logout.svg' alt='logout' className='size-6'/>

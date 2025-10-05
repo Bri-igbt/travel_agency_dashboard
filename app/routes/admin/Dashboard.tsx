@@ -1,9 +1,26 @@
 import {Header, StatsCard, TripCard} from "../../../components";
 import { dashboardStats, users, allTrips } from "~/constants";
+import {getUser} from "~/appwrite/auth";
+import type { Route } from './+types/Dashboard'
 
+export const clientLoader = async () => {
+    const res: any = await getUser();
+    if (res && Array.isArray(res.rows) && res.rows.length > 0) {
+        const row = res.rows[0] as any;
+        const mappedUser: User = {
+            id: row.accountId || row.$id || "",
+            name: row.name || "",
+            email: row.email || "",
+            dateJoined: row.joinedAt || row.dateJoined || "",
+            imageUrl: row.imageUrl || "",
+        };
+        return mappedUser;
+    }
+    return null;
+};
 
-const Dashboard = () => {
-    const user = { name: 'Bright'}
+const Dashboard = ({ loaderData }: Route.ComponentProps) => {
+    const user = loaderData as unknown as User || null;
 
     return (
         <main className='dashboard wrapper'>

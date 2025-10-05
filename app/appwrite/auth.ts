@@ -4,15 +4,14 @@ import {redirect} from "react-router";
 
 export const loginWithGoogle = async () => {
     try {
-        account.createOAuth2Session({
+            account.createOAuth2Session({
             provider: OAuthProvider.Google,
-            success: 'https://example.com/success', // redirect here on success
-            failure: 'https://example.com/failed', // redirect here on failure
-            // Request Google scopes needed to read basic profile (includes profile photo)
-            scopes: ['openid', 'email', 'profile']
+            success: `${window.location.origin}/`,
+            failure: `${window.location.origin}/sign-in`,
+            scopes: ['openid', 'email', 'profile'],
         });
     } catch (error) {
-        console.log('loginWithUsingGoogle', error);
+        console.error('loginWithGoogle error:', error);
     }
 };
 
@@ -142,7 +141,7 @@ export const storeUserData = async () => {
     }
 };
 
-export const getExistingUser = async () => {
+export const getExistingUser = async ($id: string) => {
     try {
         const user = await account.get();
         if (!user) return null;
@@ -155,14 +154,44 @@ export const getExistingUser = async () => {
                 Query.limit(1),
             ],
         });
-        // @ts-ignore - RowList shape with `rows`
+
         if (rows && Array.isArray((rows as any).rows) && (rows as any).rows.length > 0) {
-            // @ts-ignore
             return (rows as any).rows[0];
         }
         return null;
     } catch (error) {
         console.log(error);
         return null;
+    }
+};
+
+export const getAllUsers = async (): Promise<User[]> => {
+    try {
+        const res = await tablesDB.listRows({
+            databaseId: appwriteConfig.databaseId,
+            tableId: appwriteConfig.userTableId,
+            // keep queries simple first
+            // queries: [Query.limit(10)],
+        });
+        // console.log("getAllUsers response:", res);
+
+        const rows = Array.isArray(res?.rows) ? res.rows : [];
+
+        const users: User[] = rows.map((row: any) => {
+            const data = row.data || row; // depending on how your table stores columns
+            return {
+                id: data.accountId || row.$id || "",
+                name: data.name || "",
+                email: data.email || "",
+                dateJoined: data.joinedAt || data.dateJoined || "",
+                imageUrl: data.imageUrl || "",
+                status: data.status || "user", // 👈 add status
+            };
+        });
+
+        return users;
+    } catch (e) {
+        console.error("Error fetching users", e);
+        return [];
     }
 };
