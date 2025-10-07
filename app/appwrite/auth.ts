@@ -170,22 +170,21 @@ export const getAllUsers = async (): Promise<User[]> => {
         const res = await tablesDB.listRows({
             databaseId: appwriteConfig.databaseId,
             tableId: appwriteConfig.userTableId,
-            // keep queries simple first
-            // queries: [Query.limit(10)],
+
         });
-        // console.log("getAllUsers response:", res);
+
 
         const rows = Array.isArray(res?.rows) ? res.rows : [];
 
         const users: User[] = rows.map((row: any) => {
-            const data = row.data || row; // depending on how your table stores columns
+            const data = row.data || row;
             return {
                 id: data.accountId || row.$id || "",
                 name: data.name || "",
                 email: data.email || "",
                 dateJoined: data.joinedAt || data.dateJoined || "",
                 imageUrl: data.imageUrl || "",
-                status: data.status || "user", // 👈 add status
+                status: data.status || "user",
             };
         });
 

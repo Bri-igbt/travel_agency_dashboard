@@ -37,8 +37,22 @@ export function parseTripData(jsonString: string): Trip | null {
     }
 }
 
-export function getFirstWord(input: string = ""): string {
-    return input.trim().split(/\s+/)[0] || "";
+export function getFirstWord(input?: unknown): string {
+    if (typeof input !== "string") {
+        if (input === null || input === undefined) return "";
+        try {
+            input = String(input);
+        } catch {
+            return "";
+        }
+    }
+
+    const s = (input as string).trim();
+    if (!s) return "";
+
+    // Strip leading emojis/symbols/punctuation before extracting the first word
+    const cleaned = s.replace(/^[\p{Punctuation}\p{Symbol}\p{Extended_Pictographic}\s]+/gu, "");
+    return cleaned.split(/\s+/)[0] || "";
 }
 
 export const calculateTrendPercentage = (
