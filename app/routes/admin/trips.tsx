@@ -1,8 +1,10 @@
-import {Header} from "../../../components";
-import type {LoaderFunctionArgs} from "react-router";
+import {Header, TripCard} from "../../../components";
+import {type LoaderFunctionArgs, useSearchParams} from "react-router";
 import {getAllTrips, getTripById} from "~/appwrite/trips";
 import {parseTripData} from "~/libs/utils";
 import type {Route} from './+types/trips';
+import {useState} from "react";
+import {PagerComponent} from "@syncfusion/ej2-react-grids";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
     const limit = 8
@@ -13,7 +15,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const { allTrips, total } = await getAllTrips(limit, offset);
 
     return {
-        trips:allTrips.map(({ $id, tripDetail, imageUrls }: any) => ({
+        trips: allTrips.map(({ $id, tripDetail, imageUrls }: any) => ({
             id: $id,
             ...parseTripData(tripDetail),
             imageUrls: imageUrls || [],
@@ -25,6 +27,16 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 const Trips = ({ loaderData }: Route.ComponentProps) => {
     const trips = loaderData.trips as Trip[] | [];
+    const [searchParams] = useSearchParams()
+    const initialPage = Number(searchParams.get('page') || '1')
+
+    const [currentPage, setCurrentPage] = useState(initialPage)
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        window.location.search= `?page=${page}`
+    }
+
     return (
         <main className='all-users wrapper'>
             <Header
@@ -35,7 +47,32 @@ const Trips = ({ loaderData }: Route.ComponentProps) => {
             />
 
             <section>
-                <h1 className='p-24-semibold'></h1>
+                <h1 className='p-24-semibold text-dark-100 mb-4'>
+                    Manage Created Trips
+                </h1>
+
+                <div className='trip-grid mb-4'>
+                    {trips.map((trip) => (
+                        <TripCard
+                            key={trip.id}
+                            id={trip.id}
+                            name={trip.name}
+                            location={trip.itinerary?.[0].location ?? ''}
+                            imageUrls={trip.imageUrls[0]}
+                            tags={[ trip.interests, trip.travelStyle]}
+                            price={trip.estimatedPrice}
+                        />
+                    ))}
+                </div>
+
+                <PagerComponent
+                    totalRecordsCount={loaderData.total}
+                    pageSize={8}
+                    currentPage={currentPage}
+                    click={(args) => handlePageChange(args.currentPage)}
+                    cssClass='!mb-4'
+                />
+
             </section>
         </main>
     )

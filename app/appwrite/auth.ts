@@ -165,7 +165,7 @@ export const getExistingUser = async ($id: string) => {
     }
 };
 
-export const getAllUsers = async (): Promise<User[]> => {
+export const getAllUsers = async (limit?: number, offset?: number): Promise<User[]> => {
     try {
         const res = await tablesDB.listRows({
             databaseId: appwriteConfig.databaseId,
