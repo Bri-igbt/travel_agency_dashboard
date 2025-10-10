@@ -145,7 +145,7 @@ export const getTripsByTravelStyle = async () => {
     const travelStyleCounts = rows.reduce(
         (acc: { [key: string]: number }, row: any) => {
             const data = row?.data ?? row;
-            let details: any = data?.tripDetails;
+            let details: any = data?.tripDetail ?? data?.tripDetails;
 
             if (typeof details === "string") {
                 try { details = JSON.parse(details); } catch { /* ignore */ }
